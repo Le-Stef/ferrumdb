@@ -1,0 +1,58 @@
+[package]
+name = "ferrumdb"
+version = "0.3.0"
+edition = "2021"
+authors = ["Le-Stef"]
+description = "Une base de données clef/valeur en mémoire : léger et performant, compatible Redis."
+license = "MIT"
+
+[dependencies]
+# Runtime asynchrone
+tokio = { version = "1.35", features = ["full"] }
+
+# Manipulation efficace des octets
+bytes = "1.5"
+
+# Hashage
+siphasher = "1.0"
+
+# Gestion du TTL
+tokio-util = { version = "0.7", features = ["time"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+serde = { version = "1.0", features = ["derive"] }
+
+# Hashage pour les sommes de contrôle AOF
+xxhash-rust = { version = "0.8", features = ["xxh64"] }
+
+# Serveur de l'interface Web
+axum = "0.7"
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+serde_json = "1.0"
+sysinfo = "0.32"
+
+# Gestion des errors
+anyhow = "1.0"
+
+# Détection des CPUs pour le sharding
+num_cpus = "1.16"
+
+# Encodage Base64 pour le debugging
+base64 = "0.21"
+
+[dev-dependencies]
+# Utilitaires de test
+tokio-test = "0.4"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+opt-level = 0

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FerrumDB - Administration Console</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #333333 0%, #cfcfcf 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: #e8e8e8;
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            background: white;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Tab Styles */
+        .logo-section {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .logo {
+            font-size: 6em;
+            margin-bottom: 20px;
+        }
+
+        .home-title {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .home-subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Commands Tab Styles */
+        .command-box {
+            margin-bottom: 20px;
+        }
+
+        .command-box label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .command-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .command-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        .command-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #43a047 100%);
+        }
+
+        .response-box {
+            margin-top: 20px;
+        }
+
+        .response-content {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response-content.success {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .response-content.error {
+            border-color: #f44336;
+            background: #fef1f0;
+            color: #d32f2f;
+        }
+
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .example-commands {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .example-cmd {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .example-cmd:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Config Tab Styles */
+        .config-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .config-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .config-label {
+            font-weight: 600;
+            min-width: 150px;
+            color: #333;
+        }
+
+        .config-value {
+            flex: 1;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .config-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .status-running {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-stopped {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-unit {
+            font-size: 0.6em;
+            color: #999;
+        }
+
+        /* Cluster Tab Styles */
+        .node-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .node-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .node-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .node-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .node-info-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .node-info-value {
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #999;
+            font-size: 0.85em;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>FerrumDB</h1>
+            <p>High-Performance In-Memory Database · Administration Console</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('home')">🏠 FerrumDB</button>
+            <button class="tab" onclick="showTab('cluster')">🌐 Cluster</button>
+            <button class="tab" onclick="showTab('commands')">⚡ Commands</button>
+            <button class="tab" onclick="showTab('config')">⚙️ Configuration</button>
+        </div>
+
+        <!-- Home Tab -->
+        <div id="home" class="tab-content active">
+            <div class="logo-section">
+                <p style="color: #999; margin-bottom: 10px;">Version 0.1.0 - Phase 2</p>
+                <p style="color: #999; font-size: 0.9em;">© 2025 FerrumDB Contributors · Built with Rust</p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">Ultra-Fast</div>
+                    <div class="feature-desc">Sub-millisecond latency with optimized data structures</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Persistent</div>
+                    <div class="feature-desc">AOF journaling with configurable sync policies</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Reliable</div>
+                    <div class="feature-desc">Memory-safe Rust implementation with checksum validation</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Redis Compatible</div>
+                    <div class="feature-desc">RESP2 protocol support for easy integration</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Rich Data Types</div>
+                    <div class="feature-desc">Strings, Hashes, Lists, Sets, and Counters</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Web Interface</div>
+                    <div class="feature-desc">Modern admin console for monitoring and management</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cluster Tab -->
+        <div id="cluster" class="tab-content">
+            <h2 style="color: #667eea; margin-bottom: 20px;">Cluster Topology</h2>
+
+            <div class="node-card">
+                <div class="node-header">
+                    <div class="node-title">🖥️ Node: localhost</div>
+                    <span class="status-badge status-running">Running</span>
+                </div>
+                <div class="node-info">
+                    <div class="node-info-item">
+                        <span class="node-info-label">RESP Port:</span>
+                        <span class="node-info-value" id="node-resp-port">6379</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span class="node-info-label">HTTP Port:</span>
+                        <span class="node-info-value">8080</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span class="node-info-label">Role:</span>
+                        <span class="node-info-value">Master</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span class="node-info-label">Mode:</span>
+                        <span class="node-info-value">Standalone</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span class="node-info-label">Active Keys:</span>
+                        <span class="node-info-value" id="node-keys">0</span>
+                    </div>
+                    <div class="node-info-item">
+                        <span class="node-info-label">Uptime:</span>
+                        <span class="node-info-value" id="node-uptime">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">Sharding (Phase 3)</h3>
+            <div id="shards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                <!-- Shards will be loaded here dynamically -->
+            </div>
+
+            <div style="margin-top: 30px; padding: 20px; background: #f0f7ff; border-radius: 8px; border-left: 4px solid #667eea;">
+                <strong>ℹ️ Phase 4 Feature:</strong> Multi-node clustering will be available in the next release.
+            </div>
+        </div>
+
+        <!-- Commands Tab -->
+        <div id="commands" class="tab-content">
+            <div class="command-box">
+                <label for="commandInput">Command:</label>
+                <div class="command-input-wrapper">
+                    <input
+                        type="text"
+                        id="commandInput"
+                        class="command-input"
+                        placeholder="e.g., SET mykey myvalue"
+                    >
+                    <button id="executeBtn" class="btn">Execute</button>
+                </div>
+            </div>
+
+            <div class="response-box">
+                <label for="responseContent">Response:</label>
+                <div id="responseContent" class="response-content">
+                    Ready. Enter a command and click Execute.
+                </div>
+            </div>
+
+            <div class="examples">
+                <h3>Example Commands</h3>
+                <div class="example-commands">
+                    <div class="example-cmd" onclick="useExample('SET name Alice')">SET name Alice</div>
+                    <div class="example-cmd" onclick="useExample('GET name')">GET name</div>
+                    <div class="example-cmd" onclick="useExample('INCR counter')">INCR counter</div>
+                    <div class="example-cmd" onclick="useExample('HSET user:1 name Bob')">HSET user:1 name Bob</div>
+                    <div class="example-cmd" onclick="useExample('HGETALL user:1')">HGETALL user:1</div>
+                    <div class="example-cmd" onclick="useExample('LPUSH mylist item1')">LPUSH mylist item1</div>
+                    <div class="example-cmd" onclick="useExample('LRANGE mylist 0 -1')">LRANGE mylist 0 -1</div>
+                    <div class="example-cmd" onclick="useExample('SADD myset member1')">SADD myset member1</div>
+                    <div class="example-cmd" onclick="useExample('SMEMBERS myset')">SMEMBERS myset</div>
+                    <div class="example-cmd" onclick="useExample('EXISTS name')">EXISTS name</div>
+                    <div class="example-cmd" onclick="useExample('EXPIRE name 60')">EXPIRE name 60</div>
+                    <div class="example-cmd" onclick="useExample('KEYS *')">KEYS *</div>
+                    <div class="example-cmd" onclick="useExample('INFO')">INFO</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config Tab -->
+        <div id="config" class="tab-content">
+            <div class="config-section">
+                <h3>Server Configuration</h3>
+                <div class="config-row">
+                    <span class="config-label">Status:</span>
+                    <span class="status-badge status-running" id="server-status">Running</span>
+                </div>
+                <div class="config-row">
+                    <span class="config-label">RESP Port:</span>
+                    <div class="config-value" id="config-port">6379</div>
+                </div>
+                <div class="config-row">
+                    <span class="config-label">HTTP Port:</span>
+                    <div class="config-value">8080</div>
+                </div>
+                <div class="config-row">
+                    <span class="config-label">AOF Sync Policy:</span>
+                    <div class="config-value">EverySecond</div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3>System Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Active Keys</div>
+                        <div class="stat-value" id="stat-keys">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">DB Memory</div>
+                        <div class="stat-value" id="stat-db-mem">-<span class="stat-unit">MB</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Memory</div>
+                        <div class="stat-value" id="stat-total-mem">-<span class="stat-unit">MB</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Used Memory</div>
+                        <div class="stat-value" id="stat-used-mem">-<span class="stat-unit">MB</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Free Memory</div>
+                        <div class="stat-value" id="stat-free-mem">-<span class="stat-unit">MB</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">CPU Usage</div>
+                        <div class="stat-value" id="stat-cpu">-<span class="stat-unit">%</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Connections</div>
+                        <div class="stat-value" id="stat-connections">1</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn" onclick="refreshStats()">🔄 Refresh Statistics</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            FerrumDB v0.1.0 · Built with Rust · <a href="https://github.com/Le-Stef/ferrumdb" style="color: #667eea;">GitHub</a>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'home';
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            currentTab = tabName;
+
+            // Load data for specific tabs
+            if (tabName === 'config' || tabName === 'cluster') {
+                refreshStats();
+            }
+        }
+
+        // Command execution (from Commands tab)
+        const commandInput = document.getElementById('commandInput');
+        const executeBtn = document.getElementById('executeBtn');
+        const responseContent = document.getElementById('responseContent');
+
+        if (executeBtn) {
+            executeBtn.addEventListener('click', executeCommand);
+        }
+
+        if (commandInput) {
+            commandInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    executeCommand();
+                }
+            });
+        }
+
+        async function executeCommand() {
+            const command = commandInput.value.trim();
+
+            if (!command) {
+                showResponse('Please enter a command.', false);
+                return;
+            }
+
+            executeBtn.disabled = true;
+            executeBtn.innerHTML = 'Executing...<span class="loading"></span>';
+            responseContent.className = 'response-content';
+            responseContent.textContent = 'Executing command...';
+
+            try {
+                const response = await fetch('/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command }),
+                });
+
+                const data = await response.json();
+                showResponse(data.result, data.success);
+            } catch (error) {
+                showResponse(`Network error: ${error.message}`, false);
+            } finally {
+                executeBtn.disabled = false;
+                executeBtn.textContent = 'Execute';
+            }
+        }
+
+        function showResponse(text, success) {
+            responseContent.textContent = text;
+            responseContent.className = `response-content ${success ? 'success' : 'error'}`;
+        }
+
+        function useExample(command) {
+            commandInput.value = command;
+            showTab('commands');
+            commandInput.focus();
+        }
+
+        // Statistics refresh
+        async function refreshStats() {
+            try {
+                // Execute INFO command to get stats
+                const response = await fetch('/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'INFO' }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    parseInfoResponse(data.result);
+                }
+
+                // Get system stats
+                const sysResponse = await fetch('/stats');
+                if (sysResponse.ok) {
+                    const sysData = await sysResponse.json();
+                    updateSystemStats(sysData);
+                }
+
+                // Load shard details
+                await loadShards();
+            } catch (error) {
+                console.error('Failed to refresh stats:', error);
+            }
+        }
+
+        async function loadShards() {
+            try {
+                const response = await fetch('/shards');
+                if (response.ok) {
+                    const shards = await response.json();
+                    displayShards(shards);
+                }
+            } catch (error) {
+                console.error('Failed to load shards:', error);
+            }
+        }
+
+        function displayShards(shards) {
+            const container = document.getElementById('shards-container');
+            if (!container) return;
+
+            container.innerHTML = shards.map(shard => `
+                <div class="stat-card">
+                    <div style="font-weight: bold; color: #667eea; margin-bottom: 10px;">
+                        🧩 Shard ${shard.shard_id}
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">
+                        Keys: <strong>${shard.active_keys}</strong>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">
+                        Memory: <strong>${(shard.memory_bytes / 1024).toFixed(2)} KB</strong>
+                    </div>
+                    <div style="font-size: 0.85em; color: #999;">
+                        Total: ${shard.total_keys} | Expired: ${shard.expired_keys}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function parseInfoResponse(info) {
+            // Parse keys count from INFO response
+            const keysMatch = info.match(/keys=(\d+)/);
+            if (keysMatch) {
+                const keys = keysMatch[1];
+                const statKeys = document.getElementById('stat-keys');
+                const nodeKeys = document.getElementById('node-keys');
+                if (statKeys) statKeys.textContent = keys;
+                if (nodeKeys) nodeKeys.textContent = keys;
+            }
+        }
+
+        function updateSystemStats(stats) {
+            if (stats.db_memory_mb !== undefined) {
+                document.getElementById('stat-db-mem').innerHTML =
+                    `${stats.db_memory_mb.toFixed(3)}<span class="stat-unit">MB</span>`;
+            }
+            if (stats.total_memory_mb) {
+                document.getElementById('stat-total-mem').innerHTML =
+                    `${stats.total_memory_mb.toFixed(0)}<span class="stat-unit">MB</span>`;
+            }
+            if (stats.used_memory_mb) {
+                document.getElementById('stat-used-mem').innerHTML =
+                    `${stats.used_memory_mb.toFixed(1)}<span class="stat-unit">MB</span>`;
+            }
+            if (stats.free_memory_mb) {
+                document.getElementById('stat-free-mem').innerHTML =
+                    `${stats.free_memory_mb.toFixed(0)}<span class="stat-unit">MB</span>`;
+            }
+            if (stats.cpu_usage) {
+                document.getElementById('stat-cpu').innerHTML =
+                    `${stats.cpu_usage.toFixed(1)}<span class="stat-unit">%</span>`;
+            }
+        }
+
+        // Auto-refresh stats every 5 seconds when on config/cluster tab
+        setInterval(() => {
+            if (currentTab === 'config' || currentTab === 'cluster') {
+                refreshStats();
+            }
+        }, 5000);
+
+        // Initial stats load
+        setTimeout(refreshStats, 500);
+    </script>
+</body>
+</html>
