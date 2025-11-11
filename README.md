@@ -2,8 +2,8 @@
 
 **Une base de données clefs/valeurs en mémoire, super rapide, compatible avec Redis, écrite en Rust**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-orange?logo=rust)](https://rust-lang.org/fr/)
 
 FerrumDB est une base de données clefs/valeurs en mémoire. Léger, rapide et compatible avec Redis, il est développé en Rust. Il implémente le protocole RESP2 et offre d'excellentes performances grâce à son sharding intégré et à la persistance AOF.
 
@@ -300,7 +300,7 @@ ferrumdb_mode:standalone
 
 ## License
 
-Licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de details
+Licence Apache 2.0 - voir le fichier [LICENSE](LICENSE) pour plus de details
 
 ## Remerciements
 
